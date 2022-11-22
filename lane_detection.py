@@ -19,9 +19,9 @@ def find_canny(img,thresh_low,thresh_high): #function for implementing the canny
 
 def region_of_interest(image): #function for extracting region of interest
     #bounds in (x,y) format
-    bounds = np.array([[[0,250],[0,200],[150,100],[500,100],[650,200],[650,250]]],dtype=np.int32)
+    # bounds = np.array([[[0,250],[0,200],[150,100],[500,100],[650,200],[650,250]]],dtype=np.int32)
     
-    # bounds = np.array([[[0,image.shape[0]],[0,image.shape[0]/2],[900,image.shape[0]/2],[900,image.shape[0]]]],dtype=np.int32)
+    bounds = np.array([[[0,image.shape[0]],[0,image.shape[0]/2],[1920,image.shape[0]/2],[1920,image.shape[0]]]],dtype=np.int32)
     mask=np.zeros_like(image)
     cv2.fillPoly(mask,bounds,[255,255,255])
     # show_image('inputmask',mask)
@@ -72,16 +72,16 @@ def compute_average_lines(img,lines):
     right_average_line = np.average(right_lane_lines,axis=0)
     print(left_average_line,right_average_line)
     # #Computing weigthed sum
-    if len(left_weights)>0:
-        left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
-    if len(right_weights)>0:
-        right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+    # if len(left_weights)>0:
+    #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+    # if len(right_weights)>0:
+    #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
     left_fit_points = get_coordinates(img,left_average_line)
     right_fit_points = get_coordinates(img,right_average_line) 
     # print(left_fit_points,right_fit_points)
     return [[left_fit_points],[right_fit_points]] #returning the final coordinates
 
-
+'''
 ##Implementation
 
 # Create pipeline
@@ -104,13 +104,12 @@ camRgb.preview.link(xoutRgb.input)
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
 
-	device = cv2.VideoCapture('output.mp4')
-	#print('Connected cameras: ', device.getConnectedCameras())
+	print('Connected cameras: ', device.getConnectedCameras())
     # Print out usb speed
-	#print('Usb speed: ', device.getUsbSpeed().name)
+	print('Usb speed: ', device.getUsbSpeed().name)
     # Bootloader version
-	#if device.getBootloaderVersion() is not None:
-		#print('Bootloader version: ', device.getBootloaderVersion())
+	if device.getBootloaderVersion() is not None:
+		print('Bootloader version: ', device.getBootloaderVersion())
 
     # Output queue will be used to get the rgb frames from the output defined above
 	qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
@@ -124,21 +123,48 @@ with dai.Device(pipeline) as device:
 		#cv2.imshow('Canny',lane_canny)
 		lane_roi = region_of_interest(lane_image)
 		cv2.imshow("ROI",lane_roi)
-		lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
-		#print(lane_lines)
-		lane_lines_plotted = draw_lines(lane_image,lane_lines)
-		#cv2.imshow('lines',lane_lines_plotted)
-		""" TODO
-		result_lines = compute_average_lines(lane_image,lane_lines)
-		print(result_lines)
-		final_lines_mask = draw_lines(lane_image,result_lines)
-		show_image('final',final_lines_mask)
+		# lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
+		# print(lane_lines)
+		# lane_lines_plotted = draw_lines(lane_image,lane_lines)
+		# cv2.imshow('lines',lane_lines_plotted)
+		# result_lines = compute_average_lines(lane_image,lane_lines)
+		# print(result_lines)
+		# final_lines_mask = draw_lines(lane_image,result_lines)
+		# show_image('final',final_lines_mask)
 
-		for points in result_lines:
-			x1,y1,x2,y2 = points[0]
-			cv2.line(lane_image,(x1,y1),(x2,y2),(0,0,255),5)
+		# for points in result_lines:
+		# 	x1,y1,x2,y2 = points[0]
+		# 	cv2.line(lane_image,(x1,y1),(x2,y2),(0,0,255),5)
 
-		show_image('output',lane_image)
-		"""
+		# show_image('output',lane_image)
 		if cv2.waitKey(1) == ord('q'):
 			break
+'''
+
+
+# Video Processing:
+cap = cv2.VideoCapture('output_Trim.mp4')
+if not cap.isOpened:
+    print('Error opening video capture')
+    exit(0)
+while True:
+    ret, frame = cap.read()
+    if frame is None:
+        print(' No captured frame -- Break!')
+        break
+    lane_image = np.copy(frame)
+    lane_canny = find_canny(lane_image,100,200)
+    # show_image('canny',lane_canny)
+    lane_roi = region_of_interest(lane_canny)
+    show_image('roi',lane_roi)
+    lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
+    lane_lines_plotted = draw_lines(lane_image,lane_lines)
+    # show_image('lines',lane_lines_plotted)
+    # result_lines = compute_average_lines(lane_image,lane_lines)
+    # print(result_lines)
+    # final_lines_mask = draw_lines(lane_image,result_lines)
+    # show_image('final',final_lines_mask)
+    # for points in result_lines:
+    #     x1,y1,x2,y2 = points[0]
+    #     cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
+    # show_image('output',frame)
