@@ -72,10 +72,10 @@ def compute_average_lines(img,lines):
     right_average_line = np.average(right_lane_lines,axis=0)
     print(left_average_line,right_average_line)
     # #Computing weigthed sum
-    # if len(left_weights)>0:
-    #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
-    # if len(right_weights)>0:
-    #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+    if len(left_weights)>0:
+        left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+    if len(right_weights)>0:
+        right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
     left_fit_points = get_coordinates(img,left_average_line)
     right_fit_points = get_coordinates(img,right_average_line) 
     # print(left_fit_points,right_fit_points)
@@ -142,31 +142,3 @@ with dai.Device(pipeline) as device:
 		"""
 		if cv2.waitKey(1) == ord('q'):
 			break
-
-
-
-# Video Processing:
-# cap = cv2.VideoCapture(0)
-# if not cap.isOpened:
-#     print('Error opening video capture')
-#     exit(0)
-# while True:
-#     ret, frame = cap.read()
-#     if frame is None:
-#         print(' No captured frame -- Break!')
-#         break
-#     lane_image = np.copy(frame)
-#     lane_canny = find_canny(lane_image,100,200)
-#     show_image('canny',lane_canny)
-#     # lane_roi = region_of_interest(lane_canny)
-#     # lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
-#     # lane_lines_plotted = draw_lines(lane_image,lane_lines)
-#     # # show_image('lines',lane_lines_plotted)
-#     # result_lines = compute_average_lines(lane_image,lane_lines)
-#     # # print(result_lines)
-#     # final_lines_mask = draw_lines(lane_image,result_lines)
-#     # # show_image('final',final_lines_mask)
-#     # for points in result_lines:
-#     #     x1,y1,x2,y2 = points[0]
-#     #     cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
-#     # show_image('output',frame)
