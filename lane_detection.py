@@ -7,7 +7,7 @@ import math
 def show_image(name,img): #function for displaying the image
     cv2.imshow(name,img)
     cv2.waitKey(1)
-    cv2.destroyAllWindows()
+    #cv2.destroyAllWindows()
 
 def find_canny(img,thresh_low,thresh_high): #function for implementing the canny
     img_gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)
@@ -268,21 +268,9 @@ while True:
     result_lines = compute_average_lines(lane_image,lane_lines)
     print("Result", result_lines)
     final_lines_mask = draw_lines(lane_image,result_lines)
-    show_image('final',final_lines_mask)
-
-    #try:
-    #    result_lines = compute_average_lines(lane_image,lane_lines)
-    #    #print(result_lines)
-    #    final_lines_mask = draw_lines(lane_image,result_lines)
-    #except:
-    #    print("erorr")
-    #try:
-    #    show_image('final',final_lines_mask)
-    #except:
-    #    print("erorrr image")
+    # show_image('final',final_lines_mask)
     
-    
-    # for points in result_lines:
-    #     x1,y1,x2,y2 = points[0]
-    #     cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
-    # show_image('output',frame)
+    for points in result_lines:
+        x1,y1,x2,y2 = points[0]
+        cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
+    show_image('output',frame)
