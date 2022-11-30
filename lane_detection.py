@@ -2,10 +2,11 @@ import cv2 as cv2 #importing the library
 import numpy as np
 import matplotlib.pyplot as plt
 import depthai as dai
+import math
 
 def show_image(name,img): #function for displaying the image
     cv2.imshow(name,img)
-    cv2.waitKey(0)
+    cv2.waitKey(1)
     cv2.destroyAllWindows()
 
 def find_canny(img,thresh_low,thresh_high): #function for implementing the canny
@@ -41,10 +42,12 @@ def draw_lines(img,lines): #function for drawing lines on black mask
 def get_coordinates(img,line_parameters): #functions for getting final coordinates
     slope=line_parameters[0]
     intercept = line_parameters[1]
-    y1 =300
-    y2 = 120
-    # y1=img.shape[0]
-    # y2 = 0.6*img.shape[0]
+    #y1 =300
+    #y2 = 120
+    y1=img.shape[0]
+    y2 = 0.6*img.shape[0]
+    if slope == 0:
+        return[0,int(y1),0,int(y2)]
     x1= int((y1-intercept)/slope)
     x2 = int((y2-intercept)/slope)
     return [x1,int(y1),x2,int(y2)]
@@ -54,6 +57,94 @@ def compute_average_lines(img,lines):
     right_lane_lines=[]
     left_weights=[]
     right_weights=[]
+    #print("line-count", len(lines))
+    for points in lines:
+        x1,y1,x2,y2 = points[0]
+        if x2==x1:
+            continue     
+        parameters = np.polyfit((x1,x2),(y1,y2),1) #implementing polyfit to identify slope and intercept
+        slope,intercept = parameters     
+        
+        length = np.sqrt((y2-y1)**2+(x2-x1)**2)
+        if abs(slope) < 0.0001:
+            slope = 0.0001
+        if slope <0:
+            left_lane_lines.append([slope,intercept])
+            left_weights.append(length)         
+        else:
+            right_lane_lines.append([slope,intercept])
+            right_weights.append(length)
+        #print("slope: ", slope, "\nintercept: ", intercept)
+    
+    #print("left_lane: ", left_lane_lines, "\nright_lane: ", right_lane_lines)    
+
+    #print("length: ", len(left_lane_lines))
+
+    if len(left_lane_lines) < 1:
+        print("left lane not detected")
+
+        #Computing average slope and intercept
+        #left_average_line = np.average(left_lane_lines,axis=0)
+        left_average_line = [0,0]
+        right_average_line = np.average(right_lane_lines,axis=0)
+        #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
+        
+        #print("Averages:",left_average_line,right_average_line)
+        #Computing weigthed sum
+        # if len(left_weights)>0:
+        #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+        # if len(right_weights)>0:
+        #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+        left_fit_points = get_coordinates(img,left_average_line)
+        right_fit_points = get_coordinates(img,right_average_line) 
+        #print("Fit points:",left_fit_points,right_fit_points)
+        return [[left_fit_points],[right_fit_points]] #returning the final coordinates
+
+
+    if len(right_lane_lines) < 1:
+        print("right lane not detected")
+
+        #Computing average slope and intercept
+        left_average_line = np.average(left_lane_lines,axis=0)
+        #right_average_line = np.average(right_lane_lines,axis=0)
+        right_average_line = [0,0]
+        #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
+        
+        #print("Averages:",left_average_line,right_average_line)
+        #Computing weigthed sum
+        # if len(left_weights)>0:
+        #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+        # if len(right_weights)>0:
+        #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+        left_fit_points = get_coordinates(img,left_average_line)
+        right_fit_points = get_coordinates(img,right_average_line) 
+        #print("Fit points:",left_fit_points,right_fit_points)
+        return [[left_fit_points],[right_fit_points]] #returning the final coordinates
+
+    else:
+        #Computing average slope and intercept
+        left_average_line = np.average(left_lane_lines,axis=0)
+        right_average_line = np.average(right_lane_lines,axis=0)
+        #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
+        
+        #print("Averages:",left_average_line,right_average_line)
+        #Computing weigthed sum
+        # if len(left_weights)>0:
+        #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+        # if len(right_weights)>0:
+        #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+        left_fit_points = get_coordinates(img,left_average_line)
+        right_fit_points = get_coordinates(img,right_average_line) 
+        #print("Fit points:",left_fit_points,right_fit_points)
+        return [[left_fit_points],[right_fit_points]] #returning the final coordinates
+'''
+def compute_average_lines(img,lines):
+    left_lane_lines=[]
+    right_lane_lines=[]
+    left_weights=[]
+    right_weights=[]
+    right_fit_points =[]
+    left_fit_points = []
     for points in lines:
         x1,y1,x2,y2 = points[0]
         if x2==x1:
@@ -67,19 +158,30 @@ def compute_average_lines(img,lines):
         else:
             right_lane_lines.append([slope,intercept])
             right_weights.append(length)
+
     # Computing average slope and intercept
     left_average_line = np.average(left_lane_lines,axis=0)
     right_average_line = np.average(right_lane_lines,axis=0)
-    print(left_average_line,right_average_line)
-    # #Computing weigthed sum
-    # if len(left_weights)>0:
-    #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
-    # if len(right_weights)>0:
-    #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
-    left_fit_points = get_coordinates(img,left_average_line)
-    right_fit_points = get_coordinates(img,right_average_line) 
+    #print(left_average_line,right_average_line)
+    
+    #Computing weigthed sum
+    if len(left_weights)>0:
+        left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+    if len(right_weights)>0:
+        right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+    
+    if math.isnan(left_average_line):
+        left_average_line = [0]
+    if math.isnan(right_average_line):
+        right_average_line = [0]
+    #print("left avg line: ", left_average_line, "\nright avg line: ", right_average_line)
+    if len(left_average_line) > 0:
+        left_fit_points = get_coordinates(img,left_average_line)
+    if len(right_average_line) > 0:
+        right_fit_points = get_coordinates(img,right_average_line)
     # print(left_fit_points,right_fit_points)
     return [[left_fit_points],[right_fit_points]] #returning the final coordinates
+'''
 
 '''
 ##Implementation
@@ -156,14 +258,30 @@ while True:
     lane_canny = find_canny(lane_image,100,200)
     # show_image('canny',lane_canny)
     lane_roi = region_of_interest(lane_canny)
-    show_image('roi',lane_roi)
+    # show_image('roi',lane_roi)
     lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
     lane_lines_plotted = draw_lines(lane_image,lane_lines)
     # show_image('lines',lane_lines_plotted)
-    # result_lines = compute_average_lines(lane_image,lane_lines)
-    # print(result_lines)
-    # final_lines_mask = draw_lines(lane_image,result_lines)
-    # show_image('final',final_lines_mask)
+    result_lines = []
+    final_lines_mask = []
+    
+    result_lines = compute_average_lines(lane_image,lane_lines)
+    print("Result", result_lines)
+    final_lines_mask = draw_lines(lane_image,result_lines)
+    show_image('final',final_lines_mask)
+
+    #try:
+    #    result_lines = compute_average_lines(lane_image,lane_lines)
+    #    #print(result_lines)
+    #    final_lines_mask = draw_lines(lane_image,result_lines)
+    #except:
+    #    print("erorr")
+    #try:
+    #    show_image('final',final_lines_mask)
+    #except:
+    #    print("erorrr image")
+    
+    
     # for points in result_lines:
     #     x1,y1,x2,y2 = points[0]
     #     cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
