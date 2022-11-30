@@ -282,9 +282,21 @@ while True:
     final_lines_mask = draw_lines(lane_image,result_lines)
     # show_image('final',final_lines_mask)
     
+    total_slope = []
+
     for points in result_lines:
         x1,y1,x2,y2 = points[0]
+        if abs(x1-x2) > 0:
+            slope = (y1-y2)/(x1-x2)
+            total_slope.append(slope)
+
         cv2.line(frame,(x1,y1),(x2,y2),(0,0,255),2)
+    total_slope = np.mean(total_slope)
+    if total_slope > 0:
+        print("left")
+    elif total_slope < 0:
+        print("right")
+
     show_image('output',frame)
     if cv2.waitKey(1) == ord('q'):
         break
