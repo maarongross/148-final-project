@@ -83,63 +83,32 @@ def compute_average_lines(img,lines):
 
     #print("length: ", len(left_lane_lines))
 
-    if len(left_lane_lines) < 1:
-        print("left lane not detected")
-
-        #Computing average slope and intercept
-        #left_average_line = np.average(left_lane_lines,axis=0)
+    #Computing average slope and intercept
+    if len(left_lane_lines) < 1: # check if there is a left lane or not
         left_average_line = [0,0]
-        right_average_line = np.average(right_lane_lines,axis=0)
-        #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
-        
-        #print("Averages:",left_average_line,right_average_line)
-        #Computing weigthed sum
-        # if len(left_weights)>0:
-        #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
-        # if len(right_weights)>0:
-        #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
-        left_fit_points = get_coordinates(img,left_average_line)
-        right_fit_points = get_coordinates(img,right_average_line) 
-        #print("Fit points:",left_fit_points,right_fit_points)
-        return [[left_fit_points],[right_fit_points]] #returning the final coordinates
-
-
-    if len(right_lane_lines) < 1:
-        print("right lane not detected")
-
-        #Computing average slope and intercept
-        left_average_line = np.average(left_lane_lines,axis=0)
-        #right_average_line = np.average(right_lane_lines,axis=0)
-        right_average_line = [0,0]
-        #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
-        
-        #print("Averages:",left_average_line,right_average_line)
-        #Computing weigthed sum
-        # if len(left_weights)>0:
-        #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
-        # if len(right_weights)>0:
-        #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
-        left_fit_points = get_coordinates(img,left_average_line)
-        right_fit_points = get_coordinates(img,right_average_line) 
-        #print("Fit points:",left_fit_points,right_fit_points)
-        return [[left_fit_points],[right_fit_points]] #returning the final coordinates
-
+        print("Left lane not detected")
     else:
-        #Computing average slope and intercept
         left_average_line = np.average(left_lane_lines,axis=0)
+        print("Left lane detected")
+    
+    if len(right_lane_lines) < 1: # same as left lanes, but for right lanes
+        right_average_line = [0,0]
+        print("Right lane not detected")
+    else:
         right_average_line = np.average(right_lane_lines,axis=0)
-        #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
-        
-        #print("Averages:",left_average_line,right_average_line)
-        #Computing weigthed sum
-        # if len(left_weights)>0:
-        #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
-        # if len(right_weights)>0:
-        #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
-        left_fit_points = get_coordinates(img,left_average_line)
-        right_fit_points = get_coordinates(img,right_average_line) 
-        #print("Fit points:",left_fit_points,right_fit_points)
-        return [[left_fit_points],[right_fit_points]] #returning the final coordinates
+        print("Right lane detected")
+    #print("left_average: ", left_average_line, "\nright_average: ", right_average_line)
+    
+    #print("Averages:",left_average_line,right_average_line)
+    #Computing weigthed sum
+    # if len(left_weights)>0:
+    #     left_average_line = np.dot(left_weights,left_lane_lines)/np.sum(left_weights)
+    # if len(right_weights)>0:
+    #     right_average_line = np.dot(right_weights,right_lane_lines)/np.sum(right_weights)
+    left_fit_points = get_coordinates(img,left_average_line)
+    right_fit_points = get_coordinates(img,right_average_line) 
+    #print("Fit points:",left_fit_points,right_fit_points)
+    return [[left_fit_points],[right_fit_points]] #returning the final coordinates
 
 class VESC:
     ''' 
@@ -164,7 +133,7 @@ class VESC:
     pip install git+https://github.com/LiamBindle/PyVESC.git@master
     to install the pyvesc library
     '''
-    def __init__(self, serial_port, percent=.2, has_sensor=False, start_heartbeat=True, baudrate=115200, timeout=0.05, steering_scale = 1.0, steering_offset = 0.0 ):
+    def __init__(self, serial_port, percent=.15, has_sensor=False, start_heartbeat=True, baudrate=115200, timeout=0.05, steering_scale = 1.0, steering_offset = 0.05 ):
         
         try:
             import pyvesc
@@ -195,6 +164,14 @@ class VESC:
         self.v.set_servo((angle * self.steering_scale) + self.steering_offset)
         self.v.set_duty_cycle(throttle*self.percent)
 
+    def left_turn(self, slope):
+        angle = slope * 0.4
+        self.v.set_servo((angle * self.steering_scale) + self.steering_offset)
+
+    def right_turn(self, slope):
+        angle = 0.5 + (1 - slope) * 0.4
+        self.v.set_servo((angle * self.steering_scale) + self.steering_offset)
+
 
 ##Implementation
 
@@ -215,6 +192,11 @@ camRgb.setColorOrder(dai.ColorCameraProperties.ColorOrder.RGB)
 # Linking
 camRgb.preview.link(xoutRgb.input)
 
+# Create VESC object and start motor
+Vesc_object = VESC('/dev/ttyACM0') # create a VESC object with the serial port and also specify the other keyword arguments if they are different from the 
+#ones in your myconfig.py script
+Vesc_object.run(0.5,0.2) #0.5 = straight, 0.1 is 10% throttle
+
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
     print('Connected cameras: ', device.getConnectedCameras())
@@ -230,40 +212,46 @@ with dai.Device(pipeline) as device:
 
         image = inRgb.getCvFrame()
         lane_image = np.copy(image)
-        lane_canny = find_canny(lane_image,50,100)
+        lane_canny = find_canny(lane_image,100,200)
         # show_image('canny',lane_canny)
         lane_roi = region_of_interest(lane_canny)
         # show_image('roi',lane_roi)
         lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
-        lane_lines_plotted = draw_lines(lane_image,lane_lines)
+        if lane_lines is not None:
+            lane_lines_plotted = draw_lines(lane_image,lane_lines)
+        else:
+            continue
         # show_image('lines',lane_lines_plotted)
         result_lines = []
         final_lines_mask = []
         
         result_lines = compute_average_lines(lane_image,lane_lines)
-        print("Result", result_lines)
+        # print("Result", result_lines)
         final_lines_mask = draw_lines(lane_image,result_lines)
         # show_image('final',final_lines_mask)
         
         total_slope = []
 
-        for points in result_lines:
-            x1,y1,x2,y2 = points[0]
-            if abs(x1-x2) > 0:
-                slope = (y1-y2)/(x1-x2)
-                total_slope.append(slope)
+        if len(result_lines) > 0:
+            for points in result_lines:
+                x1,y1,x2,y2 = points[0]
+                if abs(x1-x2) > 0:
+                    slope = (y1-y2)/(x1-x2)
+                    total_slope.append(slope)
 
-            cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
+                cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
         total_slope = np.mean(total_slope)
+        print("Total Slope: ", total_slope)
         if total_slope > 0:
             print("left")
-        elif total_slope < 0:
+            Vesc_object.left_turn(abs(total_slope))
+        elif total_slope <= 0:
             print("right")
-
-        show_image('output',image)
+            Vesc_object.right_turn(abs(total_slope))
+        # show_image('output',image)
         if cv2.waitKey(1) == ord('q'):
             break
-
+    Vesc_object.run(0.5,0)
 '''
 # Video Processing:
 cap = cv2.VideoCapture('output_Trim.mp4')
