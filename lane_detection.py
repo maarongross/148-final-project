@@ -195,7 +195,7 @@ class VESC:
         self.v.set_servo((angle * self.steering_scale) + self.steering_offset)
         self.v.set_duty_cycle(throttle*self.percent)
 
-'''
+
 ##Implementation
 
 # Create pipeline
@@ -217,45 +217,54 @@ camRgb.preview.link(xoutRgb.input)
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
-
-	print('Connected cameras: ', device.getConnectedCameras())
+    print('Connected cameras: ', device.getConnectedCameras())
     # Print out usb speed
-	print('Usb speed: ', device.getUsbSpeed().name)
+    print('Usb speed: ', device.getUsbSpeed().name)
     # Bootloader version
-	if device.getBootloaderVersion() is not None:
-		print('Bootloader version: ', device.getBootloaderVersion())
-
+    if device.getBootloaderVersion() is not None:
+        print('Bootloader version: ', device.getBootloaderVersion())
     # Output queue will be used to get the rgb frames from the output defined above
-	qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    while True:
+        inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
 
-	while True:
-		inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
+        image = inRgb.getCvFrame()
+        lane_image = np.copy(image)
+        lane_canny = find_canny(lane_image,50,100)
+        # show_image('canny',lane_canny)
+        lane_roi = region_of_interest(lane_canny)
+        # show_image('roi',lane_roi)
+        lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
+        lane_lines_plotted = draw_lines(lane_image,lane_lines)
+        # show_image('lines',lane_lines_plotted)
+        result_lines = []
+        final_lines_mask = []
+        
+        result_lines = compute_average_lines(lane_image,lane_lines)
+        print("Result", result_lines)
+        final_lines_mask = draw_lines(lane_image,result_lines)
+        # show_image('final',final_lines_mask)
+        
+        total_slope = []
 
-		image = inRgb.getCvFrame()
-		lane_image = np.copy(image)
-		lane_canny = find_canny(lane_image,100,200)
-		#cv2.imshow('Canny',lane_canny)
-		lane_roi = region_of_interest(lane_image)
-		cv2.imshow("ROI",lane_roi)
-		# lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
-		# print(lane_lines)
-		# lane_lines_plotted = draw_lines(lane_image,lane_lines)
-		# cv2.imshow('lines',lane_lines_plotted)
-		# result_lines = compute_average_lines(lane_image,lane_lines)
-		# print(result_lines)
-		# final_lines_mask = draw_lines(lane_image,result_lines)
-		# show_image('final',final_lines_mask)
+        for points in result_lines:
+            x1,y1,x2,y2 = points[0]
+            if abs(x1-x2) > 0:
+                slope = (y1-y2)/(x1-x2)
+                total_slope.append(slope)
 
-		# for points in result_lines:
-		# 	x1,y1,x2,y2 = points[0]
-		# 	cv2.line(lane_image,(x1,y1),(x2,y2),(0,0,255),5)
+            cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
+        total_slope = np.mean(total_slope)
+        if total_slope > 0:
+            print("left")
+        elif total_slope < 0:
+            print("right")
 
-		# show_image('output',lane_image)
-		if cv2.waitKey(1) == ord('q'):
-			break
+        show_image('output',image)
+        if cv2.waitKey(1) == ord('q'):
+            break
+
 '''
-
-
 # Video Processing:
 cap = cv2.VideoCapture('output_Trim.mp4')
 if not cap.isOpened:
@@ -300,3 +309,4 @@ while True:
     show_image('output',frame)
     if cv2.waitKey(1) == ord('q'):
         break
+'''
