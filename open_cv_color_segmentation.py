@@ -78,6 +78,7 @@ def compute_average_lines(img,lines):
     print(left_fit_points,right_fit_points)
     return [[left_fit_points],[right_fit_points]] #returning the final coordinates
 
+'''
 ###*****************************************************************###
 ##Color Segmentation:
 image2 = cv2.imread('coneImage.jpg') #put in cone image
@@ -121,7 +122,7 @@ show_image('bitmask',lane_image_mask)
 
 #Plotting the final lines on main image
 # for points in result_lines_2:
-
+'''
 # ###******************************************************************************#####
 
 # # #Video Processing:
