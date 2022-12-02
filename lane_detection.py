@@ -4,8 +4,7 @@ import matplotlib.pyplot as plt
 import depthai as dai
 import math
 import time
-
-# TODO - calc slopes and make VESC steering react to slope values
+from simple_pid import PID
 
 def show_image(name,img): #function for displaying the image
     cv2.imshow(name,img)
@@ -25,7 +24,7 @@ def region_of_interest(image): #function for extracting region of interest
     #bounds in (x,y) format
     # bounds = np.array([[[0,250],[0,200],[150,100],[500,100],[650,200],[650,250]]],dtype=np.int32)
     
-    bounds = np.array([[[0,image.shape[0]],[0,image.shape[0]/2],[1920,image.shape[0]/2],[1920,image.shape[0]]]],dtype=np.int32)
+    bounds = np.array([[[0,image.shape[0]],[0,2*image.shape[0]/3],[1920,2*image.shape[0]/3],[1920,image.shape[0]]]],dtype=np.int32)
     mask=np.zeros_like(image)
     cv2.fillPoly(mask,bounds,[255,255,255])
     # show_image('inputmask',mask)
@@ -195,10 +194,10 @@ camRgb.preview.link(xoutRgb.input)
 # Create VESC object and start motor
 Vesc_object = VESC('/dev/ttyACM0') # create a VESC object with the serial port and also specify the other keyword arguments if they are different from the 
 #ones in your myconfig.py script
-Vesc_object.run(0.5,0.2) #0.5 = straight, 0.1 is 10% throttle
 
 # Connect to device and start pipeline
 with dai.Device(pipeline) as device:
+    # pid = PID(1, 0.1, 0.05, setpoint=1)
     print('Connected cameras: ', device.getConnectedCameras())
     # Print out usb speed
     print('Usb speed: ', device.getUsbSpeed().name)
@@ -207,24 +206,47 @@ with dai.Device(pipeline) as device:
         print('Bootloader version: ', device.getBootloaderVersion())
     # Output queue will be used to get the rgb frames from the output defined above
     qRgb = device.getOutputQueue(name="rgb", maxSize=4, blocking=False)
+    Vesc_object.run(0.5,0.2) #0.5 = straight, 0.1 is 10% throttle
     while True:
         inRgb = qRgb.get()  # blocking call, will wait until a new data has arrived
-
         image = inRgb.getCvFrame()
+        ###### COLOR SEGMENTATION ######
+        lane_image_2 = np.copy(image)
+        # lane_image_2 = cv2.cvtColor(lane_image_2,cv2.COLOR_BGR2RGB)
+        lane_image_2 =cv2.cvtColor(lane_image_2,cv2.COLOR_BGR2HSV)
+        # show_image('input',lane_image_2)
+        # show_image('hsv_input',lane_image_2)
+        print("DISPLAY")
+        plt.imshow(lane_image_2)
+        plt.show()
+        #Defining upper and lower boundaries for white color
+        lower_white_hls = np.uint8([  0, 170,   0])
+        upper_white_hls = np.uint8([5, 250, 255])
+        # #Using bitwise operators to segment out white colors
+        lane_white_mask = cv2.inRange(lane_image_2,lower_white_hls,upper_white_hls)
+        show_image('whitemask',lane_white_mask)
+        kernel = np.ones((15,15),np.uint8)
+        lane_image_2 = cv2.morphologyEx(lane_white_mask, cv2.MORPH_CLOSE, kernel)
+        kerenel_dilate = np.ones((7,7),np.uint8)
+        lane_image_3 = cv2.dilate(lane_image_2,kerenel_dilate,iterations = 1)
+        show_image('closing',lane_image_2)
+        show_image('withdilation', lane_image_3)
+        lane_image_mask = cv2.bitwise_and(lane_image_2,lane_image_2,mask=lane_white_mask)
+        show_image('bitmask',lane_image_mask)
+
+        ## back to line detection ##
         lane_image = np.copy(image)
+        show_image('image',lane_image)
         lane_canny = find_canny(lane_image,100,200)
         # show_image('canny',lane_canny)
         lane_roi = region_of_interest(lane_canny)
-        # show_image('roi',lane_roi)
+        show_image('roi',lane_roi)
         lane_lines = cv2.HoughLinesP(lane_roi,1,np.pi/180,50,40,5)
         if lane_lines is not None:
             lane_lines_plotted = draw_lines(lane_image,lane_lines)
         else:
             continue
-        # show_image('lines',lane_lines_plotted)
-        result_lines = []
-        final_lines_mask = []
-        
+        show_image('lines',lane_lines_plotted)
         result_lines = compute_average_lines(lane_image,lane_lines)
         # print("Result", result_lines)
         final_lines_mask = draw_lines(lane_image,result_lines)
@@ -241,6 +263,7 @@ with dai.Device(pipeline) as device:
 
                 cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
         total_slope = np.mean(total_slope)
+        # total_slope = pid(total_slope)
         print("Total Slope: ", total_slope)
         if total_slope > 0:
             print("left")
