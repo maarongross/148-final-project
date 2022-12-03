@@ -11,16 +11,28 @@ lane_image_2 =cv2.cvtColor(lane_image_2,cv2.COLOR_BGR2HSV)
 print("DISPLAY")
 plt.imshow(lane_image_2)
 plt.show()
-#Defining upper and lower boundaries for white color
-lower_white_hls = np.uint8([  0, 170,   0])
-upper_white_hls = np.uint8([5, 250, 255])
-# #Using bitwise operators to segment out white colors
-lane_white_mask = cv2.inRange(lane_image_2,lower_white_hls,upper_white_hls)
-show_image('whitemask',lane_white_mask)
+
+#Defining upper and lower boundaries for blue color
+lower_blue_hls = np.uint8([  255, 0,   0])
+upper_blue_hls = np.uint8([255, 250, 0])
+# #Using bitwise operators to segment out blue colors
+lane_blue_mask = cv2.inRange(lane_image_2,lower_blue_hls,upper_blue_hls)
+show_image('bluemask',lane_blue_mask)
 kernel = np.ones((15,15),np.uint8)
-lane_image_2 = cv2.morphologyEx(lane_white_mask, cv2.MORPH_CLOSE, kernel)
+lane_image_2 = cv2.morphologyEx(lane_blue_mask, cv2.MORPH_CLOSE, kernel)
 kerenel_dilate = np.ones((7,7),np.uint8)
 lane_image_3 = cv2.dilate(lane_image_2,kerenel_dilate,iterations = 1)
+
+#Defining upper and lower boundaries for green color
+lower_green_hls = np.uint8([  0, 255,   0])
+upper_green_hls = np.uint8([255, 255, 0])
+# #Using bitwise operators to segment out green colors
+lane_green_mask = cv2.inRange(lane_image_2,lower_green_hls,upper_green_hls)
+show_image('greenmask',lane_green_mask)
+kernel = np.ones((15,15),np.uint8)
+lane_image_4 = cv2.morphologyEx(lane_green_mask, cv2.MORPH_CLOSE, kernel)
+kerenel_dilate = np.ones((7,7),np.uint8)
+lane_image_5 = cv2.dilate(lane_image_2,kerenel_dilate,iterations = 1)
 
 show_image('closing',lane_image_2)
 show_image('withdilation', lane_image_3)
