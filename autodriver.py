@@ -98,7 +98,7 @@ with dai.Device(pipeline) as device:
 
         gb_diff = norm_green - norm_blue
             
-        print("gb_diff: ",gb_diff)
+        #print("gb_diff: ",gb_diff)
         if gb_diff < 0:
             print("left")
             Vesc_object.left_turn(gb_diff)
@@ -111,7 +111,7 @@ with dai.Device(pipeline) as device:
         if velGen is not None:
             parameters = velGen.getVel(frequency)
             velocity, done = parameters
-            print(velGen.tagID)
+            print("Tag ID: ", velGen.tagID)
             print("Velocity: ", velocity)
             Vesc_object.set_vel(velocity)
             while done != 1:

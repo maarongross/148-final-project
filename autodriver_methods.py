@@ -43,7 +43,7 @@ class VESC:
     pip install git+https://github.com/LiamBindle/PyVESC.git@master
     to install the pyvesc library
     '''
-    def __init__(self, serial_port, percent=.15, has_sensor=False, start_heartbeat=True, baudrate=115200, timeout=0.05, steering_scale = 1.0, steering_offset = 0.05 ):
+    def __init__(self, serial_port, percent=.15, has_sensor=False, start_heartbeat=True, baudrate=115200, timeout=0.05, steering_scale = 1.0, steering_offset = 0.125 ):
         
         try:
             import pyvesc
@@ -143,16 +143,20 @@ class velCurve():
           self.position += time*self.velocity
           #print(self.velocity)
           #print(self.position)
+          print("speeeeeeed up!")
+          return [self.velMin, 0]
         # ramp down in the middle half
         elif self.position > self.distance/2:
           self.velocity -= self.slope*time
           self.position += time*self.velocity
           #print(self.velocity)
           #print(self.position)
+          print("slowwwwwww down!")
+          return [self.velMax, 0]
         else:
           # Poor man's exception handeling 
           print("something unexpected happened in getVel/ramp method")
-      if self.curveType == 'sine':
+      if self.curveType == 'stop':
         print("This feature has not been implemeted yet :/")
         pass        
     #If velocity is not within bounds of this object, pass to the next one
@@ -172,11 +176,12 @@ class tagReader():
   results     =   None
   tagID       =   list()
                       # curve_type minVel maxVel linear Distance 
-  nodes = {0 : velCurve(0, "constant", 0.2, 0.35, 1.683),
-           1 : velCurve(1, "constant", 0.2, 0.2, 9.650),
-           2 : velCurve(2, "constant", 0.2, 0.35, 2.280),
-           3 : velCurve(3, "constant", 0.2, 0.2, 1.918),
-           4 : velCurve(4, "constant", 0.2, 0.35, 1.280),}
+  nodes = {0 : velCurve(0, "constant", 0.2, 0.35, 1.683), #1.683 dist
+           1 : velCurve(1, "constant", 0.2, 0.2, 9.65), #9.65 dist
+           2 : velCurve(2, "constant", 0.2, 0.35, 2.28), #2.28 dist
+           3 : velCurve(3, "constant", 0.2, 0.2, 1.918), #1.918 dist
+           4 : velCurve(4, "symmetric-ramp", 0.2, 0.4, 5),
+           5 : velCurve(5, "constant", 0, 0, 0)} #5 == stop
   
   def __init__(self, detector):
     self.detector = detector
