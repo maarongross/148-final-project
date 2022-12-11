@@ -48,7 +48,8 @@ ___
 - [Our Github Repo](https://github.com/maarongross/148-final-project)
 
 
-**Results**
+##Results
+___
 
 In the end, our team was able to successfully get our car to drive autonomously, recognize AprilTags, and vary its velocity based on the information encoded on it. We were unable to implement more complex veloctiy curves besides constant curves, though with more time this and much more is possible. 
 
