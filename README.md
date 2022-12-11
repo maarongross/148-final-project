@@ -22,12 +22,13 @@
 
 ## Project Overview
 
-This project focuses on visual velocity checkpoints using AprilTags. While autonously navigating a track, the car's camera can detect an AprilTag with an encoded velocity curve that the car then carries out. First, AprilTag recognition, experimentation, and implementaiton was done on a kinematics-based Python simulation. Then, the bulk of the simulation was transferred onto the physical car. This is done using openCV and pyVESC libraries, as well as an OAKD camera, Jetson Nano, and VESC. 
+This project focuses on Visual Velocity Checkpoints (VVCs) using AprilTags. While autonously navigating a track, the car's camera can detect an AprilTag which represents an integer. The program then takes this integer and uses a predefined dictionary to map that integer to one of the velocity curves created using the track. It then carries out whatever curve the tag represents, in our case being a slow constant speed, a fast constant speed, or a complete stop. This is accomplished on the physical car by using functions from the OpenCV and Apriltag libraries on the image output from the camera, and the results from calculating velocity are sent to the motor and servo using pyVESC.
 
 ## Car Components
 
+![First prototype of car](car-in-progress.jpg)
 
-**insert car before-and-after pics**
+![Final car design](the-finished-car.jpg)
 
 ## Electrical Schematic
 
@@ -37,10 +38,12 @@ This project focuses on visual velocity checkpoints using AprilTags. While auton
 ## Implementation
 
 **Software and Hardware List**
-- Jetson Nano
-- Camera
-- MicroSD card
+- Jetson Nano with microSD card
+- OAKD Camera
+- Lidar (unused)
+- Controller for training the DonkeyCar laps
 - OpenCV
+- Apriltag (both the physical tags and the library)
 - VESC
 
 **Source code**
