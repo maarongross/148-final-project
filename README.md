@@ -12,13 +12,13 @@ ___
 
 ## 3 Autonomous Laps: DonkeyCar
 ___
-<https://youtu.be/48cDjzWQkHg>
+
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/48cDjzWQkHg/0.jpg)](http://www.youtube.com/watch?v=48cDjzWQkHg "Video Title")
 
 ## 3 Autonomous Laps: OpenCV (Python)
 
 ___
-
-<https://www.youtube.com/watch?v=9QWA0Zpbya8&ab_channel=MatthewGross>
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/9QWA0Zpbya8/0.jpg)](http://www.youtube.com/watch?v=9QWA0Zpbya8 "Video Title")
 
 ## Project Overview
 ___
@@ -45,7 +45,7 @@ ___
 
 **Source code**
 
-- **insert github repo**
+- [Our Github Repo](https://github.com/maarongross/148-final-project)
 
 
 **Results**
@@ -58,7 +58,7 @@ In the end, our team was able to successfully get our car to drive autonomously,
 
 ## Final Project Demonstration
 ___
-<https://youtube.com/shorts/Gh7nhntkhSI>
+[![IMAGE ALT TEXT](http://img.youtube.com/vi/Gh7nhntkhSI/0.jpg)](http://www.youtube.com/watch?v=Gh7nhntkhSI "Video Title")
 
 
 ## Potential Improvements
