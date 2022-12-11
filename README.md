@@ -1,10 +1,77 @@
-AprilTag-imgs
-=============
+# ECE/MAE 148 Fall 2022 Team 5
 
-Images of all tags from all the pre-generated [AprilTag 3](https://github.com/AprilRobotics/apriltags) families. You can generate your own layouts or images of tags using our other repo, [AprilTag-generation](https://github.com/AprilRobotics/apriltag-generation).
 
-If the format of the markers is very small (ex : by default, 9x9 pixels), you'll need to rescale them. To do so, you may use the following imagemagick command (Unix) : 
 
-~~~
-convert <small_marker>.png -scale <scale_chosen_in_percent>% <big_marker>.png
-~~~
+## Project Team Members
+___
+ - **Marfred Barrera**: MAE
+ - **Matthew Gross**: ECE/CSE
+ - **Paul Guyett**: MAE
+ - **Andrew MacPhee**: ECE
+
+
+## 3 Autonomous Laps: DonkeyCar
+___
+<https://youtu.be/48cDjzWQkHg>
+
+## 3 Autonomous Laps: OpenCV (Python)
+
+___
+
+<https://www.youtube.com/watch?v=9QWA0Zpbya8&ab_channel=MatthewGross>
+
+## Project Overview
+___
+This project focuses on visual velocity checkpoints using AprilTags. While autonously navigating a track, the car's camera can detect an AprilTag with an encoded velocity curve that the car then carries out. First, AprilTag recognition, experimentation, and implementaiton was done on a kinematics-based Python simulation. Then, the bulk of the simulation was transferred onto the physical car. This is done using openCV and pyVESC libraries, as well as an OAKD camera, Jetson Nano, and VESC. 
+
+## Car Components
+___
+
+**insert car before-and-after pics**
+
+## Electrical Schematic
+___
+<img src="Electrical_Schematic.png" alt="schematic" width="600"/>
+
+
+## Implementation
+___
+**Software and Hardware List**
+- Jetson Nano
+- Camera
+- MicroSD card
+- OpenCV
+- VESC
+
+**Source code**
+
+- **insert github repo**
+
+
+**Results**
+
+In the end, our team was able to successfully get our car to drive autonomously, recognize AprilTags, and vary its velocity based on the information encoded on it. We were unable to implement more complex veloctiy curves besides constant curves, though with more time this and much more is possible. 
+
+
+## Gantt Chart
+- **insert gantt chart pic**
+
+## Final Project Demonstration
+___
+<https://youtube.com/shorts/Gh7nhntkhSI>
+
+
+## Potential Improvements
+
+___
+
+- Implement more complex velocity curves
+- Eliminate requirement of inputting the approximate distance for which an AprilTag will run
+- Sequential order to checkpoints
+- AprilTags encoded with steering inputs as well as velocity curves
+
+
+## Final Presentation
+___
+
+<https://docs.google.com/presentation/d/1rmymGUZG53cA7HSs-WxR7bJfRqua__aouMMzhB_43e0/edit#slide=id.p>
