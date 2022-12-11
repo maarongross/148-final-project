@@ -70,8 +70,6 @@ ___
 - Sequential order to checkpoints
 - AprilTags encoded with steering inputs as well as velocity curves
 
-
-## Final Presentation
 ___
 
-<https://docs.google.com/presentation/d/1rmymGUZG53cA7HSs-WxR7bJfRqua__aouMMzhB_43e0/edit#slide=id.p>
+[Final Presentation](https://docs.google.com/presentation/d/1rmymGUZG53cA7HSs-WxR7bJfRqua__aouMMzhB_43e0/edit#slide=id.p)
