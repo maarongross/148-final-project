@@ -48,17 +48,17 @@ This project focuses on Visual Velocity Checkpoints (VVCs) using AprilTags. Whil
 
 **Source code**
 
-- [Our Github Repo](https://github.com/maarongross/148-final-project)
+[Our Github Repo](https://github.com/maarongross/148-final-project)
 
 
 ## Results
 
 
-In the end, our team was able to successfully get our car to drive autonomously, recognize AprilTags, and vary its velocity based on the information encoded on it. We were unable to implement more complex veloctiy curves besides constant curves, though with more time this and much more is possible. 
+In the end, our team was able to successfully get our car to drive autonomously, recognize AprilTags using its respective library, and vary its velocity based on the information encoded on each tag. However, we were unable to implement more complex velocity curves besides constant curves (i.e. symmetric velocity ramps, sinusoidal velocity, etc.), though with more time this and much more is possible. 
 
 
 ## Gantt Chart
-- **insert gantt chart pic**
+![Gantt Chart](gantt.png)
 
 ## Final Project Demonstration
 
